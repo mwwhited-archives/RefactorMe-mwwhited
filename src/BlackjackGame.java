@@ -2,17 +2,18 @@ import java.util.Scanner;
 
 public class BlackjackGame {
 
-    private Scanner ki = new Scanner(System.in);
+    private final Scanner ki = new Scanner(System.in);
+    private final Dealer dealer = new Dealer();
+
     private int users;
-    private Player[] players;
+    private Player[] players; //TODO: change this to list
     private Deck deck;
-    private Dealer dealer = new Dealer();
 
     // Starts game and displays the rules
     public BlackjackGame initializeGame() {
         String names;
         System.out.println("Welcome to Blackjack!");
-        System.out.println("");
+        System.out.println();
         System.out.println("  BLACKJACK RULES: ");
         System.out.println("	-Each player is dealt 2 cards. The dealer is dealt 2 cards with one face-up and one face-down.");
         System.out.println("	-Cards are equal to their value with face cards being 10 and an Ace being 1 or 11.");
@@ -22,15 +23,13 @@ public class BlackjackGame {
         System.out.println("	-The goal is to have a higher card total than the dealer without going over 21.");
         System.out.println("	-If the player total equals the dealer total, it is a “Push” and the hand ends.");
         System.out.println("	-Players win their bet if they beat the dealer. Players win 1.5x their bet if they get “Blackjack” which is 21.");
-        System.out.println("");
-        System.out.println("");
+        System.out.println();
+        System.out.println();
 
         // Gets the amount of players and creates them
         do {
             System.out.print("How many people are playing (1-6)? ");
             users = ki.nextInt();
-
-
         } while (users > 6 || users < 0);
 
         players = new Player[users];
@@ -47,7 +46,8 @@ public class BlackjackGame {
         return this;
     }
 
-    public BlackjackGame play() throws InvalidDeckPositionException, InvalidCardSuitException, InvalidCardValueException {
+    @SuppressWarnings("UnusedReturnValue")
+    public BlackjackGame play() throws InvalidDeckPositionException {
 
         do {
             this.shuffle();
@@ -61,7 +61,7 @@ public class BlackjackGame {
             this.printMoney();
             this.clearHands();
         } while (this.playAgain());
-
+        endGame();
         return this;
     }
 
@@ -114,7 +114,7 @@ public class BlackjackGame {
     */
 
     // Shuffles the deck
-    private void shuffle() throws InvalidDeckPositionException, InvalidCardSuitException, InvalidCardValueException {
+    private void shuffle() throws InvalidDeckPositionException {
         deck.shuffle();
     }
 
@@ -129,7 +129,7 @@ public class BlackjackGame {
                     betValue = ki.nextInt();
                     players[i].setBet(betValue);
                 } while (!(betValue > 0 && betValue <= players[i].getBank()));
-                System.out.println("");
+                System.out.println();
             }
 
         }
@@ -284,7 +284,7 @@ public class BlackjackGame {
             playState = false;
         } else {
             do {
-                System.out.println("");
+                System.out.println();
                 System.out.print("Do you want to play again (Y)es or (N)o? ");
                 command = ki.next();
                 c = command.toUpperCase().charAt(0);
@@ -310,7 +310,7 @@ public class BlackjackGame {
             end = true;
         }
         if (end) {
-            System.out.println("");
+            System.out.println();
             System.out.println("All players have lost and the game ends.");
         }
 
@@ -321,7 +321,7 @@ public class BlackjackGame {
     private void endGame() {
         int endAmount;
         String endState = " no change.";
-        System.out.println("");
+        System.out.println();
         for (int i = 0; i < users; i++) {
             if (players[i].getBank() == -1) {
                 players[i].resetBank();
@@ -338,12 +338,10 @@ public class BlackjackGame {
             } else {
                 System.out.println("No change from their starting value.");
             }
-            System.out.println("");
+            System.out.println();
         }
-        System.out.println("");
-        System.out.println("");
+        System.out.println();
+        System.out.println();
         System.out.println("Thank you for playing!");
     }
-
-
-} //End class
+} 

@@ -1,17 +1,14 @@
-import java.io.Serializable;
-
 public class Player {
 
     private int bank;
     private int bet;
     private String name;
-    private Hand hand;
+    private final Hand hand;
 
     // Creates a player object
     public Player() {
         bank = 100;
         hand = new Hand();
-
     }
 
     // Gets a player's bank amount
@@ -19,25 +16,25 @@ public class Player {
         return bank;
     }
 
-    // Removes a player's bet from their bank if they bust. Sets bet to zero afterwards.
+    // Removes a player's bet from their bank if they bust. Sets bet to zero afterward.
     public void bust() {
         bank -= bet;
         bet = 0;
     }
 
-    // Adds a player's bet from their bank if they win. Sets bet to zero afterwards.
+    // Adds a player's bet from their bank if they win. Sets bet to zero afterward.
     public void win() {
         bank += bet;
         bet = 0;
     }
 
-    // Removes a player's bet from their bank if they lose. Sets bet to zero afterwards.
+    // Removes a player's bet from their bank if they lose. Sets bet to zero afterward.
     public void loss() {
         bank -= bet;
         bet = 0;
     }
 
-    // This sets the player bank to -1. -1 is unreachable and they are removed from the game
+    // This sets the player bank to -1. -1 is unreachable, they are removed from the game
     public void removeFromGame() {
         bank = -1;
     }
@@ -47,7 +44,7 @@ public class Player {
         bank = 0;
     }
 
-    // This calculate the bet for a player who has a Blackjack
+    // This calculates the bet for a player who has a Blackjack
     public void blackjack() {
         bank += bet * 1.5;
         bet = 0;
@@ -59,13 +56,13 @@ public class Player {
     }
 
     // Sets a player's bet
-    public void setBet(int newBet) {
-        bet = newBet;
+    public void setBet(int value) {
+        bet = value;
     }
 
     // Sets a player's name
-    public void setName(String name1) {
-        name = name1;
+    public void setName(String value) {
+        name = value;
     }
 
     // Gets a player's name
@@ -86,19 +83,15 @@ public class Player {
     // Adds a card to a player's hand
     public void addCard(Card card) {
         hand.addCard(card);
-
     }
 
     // Gets the player's cards to print as a string
     public String getHandString() {
-        String str = "Cards:" + hand.toString();
-
-        return str;
+        return "Cards:" + hand;
     }
 
     // Clears a player's hand
     public void clearHand() {
         hand.clearHand();
     }
-
 }

@@ -1,16 +1,10 @@
-import java.io.Serializable;
-
 public class Dealer {
 
-    private Hand hand = new Hand();
+    private final Hand hand = new Hand();
 
     // Determines if dealer has a blackjack
     public boolean isBlackjack() {
-        if (hand.calculateTotal() == 21) {
-            return true;
-        } else {
-            return false;
-        }
+        return hand.calculateTotal() == 21;
     }
 
     // This automates the dealer's play
@@ -36,9 +30,7 @@ public class Dealer {
 
     // Gets the dealer's hand as a string
     public String getHandString(boolean isDealer, boolean hideHoleCard) {
-        String str = "Cards:" + hand.toString(isDealer, hideHoleCard);
-
-        return str;
+        return "Cards:" + hand.toString(isDealer, hideHoleCard);
     }
 
     // Calculates the dealer's hand total

@@ -1,10 +1,8 @@
-import java.io.Serializable;
-
 public class Hand {
 
-    private Card[] theHand = new Card[12];
+    private Card[] theHand = new Card[12]; //TODO: this should note be a fixed length... change to list
 
-    private int numberOfCards = 0;
+    private int numberOfCards = 0; //TODO: this should just be the length of the hand list
 
     // Calculates the total of a hand and also decides whether ace is 1 or 11
     public int calculateTotal() {
@@ -30,13 +28,14 @@ public class Hand {
     }
 
     public String toString(boolean isDealer, boolean hideHoleCard) {
-        String str = "";
+        String str;
         int total = 0;
         boolean aceFlag = false;
         String aceString = "";
+        StringBuilder strBuilder = new StringBuilder();
         for (int i = 0; i < numberOfCards; i++) {
             if (isDealer && hideHoleCard && i == 0) {
-                str = " Showing";
+                strBuilder = new StringBuilder(" Showing");
             } else {
                 int value = theHand[i].getValue();
                 String valueName;
@@ -47,7 +46,7 @@ public class Hand {
                 } else {
                     valueName = Integer.toString(value);
                 }
-                str += " " + valueName + theHand[i].getSuitDesignator();
+                strBuilder.append(" ").append(valueName).append(theHand[i].getSuitDesignator());
                 if (value > 10) {
                     value = 10;
                 } else if (value == 1) {
@@ -56,6 +55,7 @@ public class Hand {
                 total += value;
             }
         }
+        str = strBuilder.toString();
         if (aceFlag && total + 10 <= 21) {
             aceString = " or " + (total + 10);
         }

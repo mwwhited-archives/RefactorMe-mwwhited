@@ -1,15 +1,11 @@
-import java.io.Serializable;
 import java.util.Random;
-import java.util.Random;
-import java.util.Scanner;
 
 public class Deck
 {
 
     private int nextCardIndex;
 
-
-    Card[] deck = new Card[52];
+    private final Card[] deck = new Card[52];
 
     public Deck() {
 
@@ -28,7 +24,7 @@ public class Deck
                 deck[count++] = new Card('D', i);
             }
         } catch (InvalidCardValueException | InvalidCardSuitException exp1) {
-
+            //TODO: why are you eating these errors?
         }
         nextCardIndex = 0;
     }
@@ -43,8 +39,8 @@ public class Deck
 
         String str = "";
 
-        for (int i = 0; i < deck.length; i++) {
-            str += deck[i].toString() + " ";
+        for (Card card : deck) {
+            str += card.toString() + " ";
         }
         return str;
     }

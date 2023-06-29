@@ -1,20 +1,9 @@
 public class InvalidCardSuitException extends Exception {
-
-    private char suitIdentifier = '?';
+    private final char suitIdentifier;
 
     public InvalidCardSuitException(char invalidSuit) {
-
+super("Attempted to create card with invalid suit argument " + invalidSuit);
         suitIdentifier = invalidSuit;
-
-        System.out.println("Invalid suit" + " " + invalidSuit);
-    }
-
-    private InvalidCardSuitException() {
-        System.out.println("Invalid suit");
-    }
-
-    public String toString() {
-        return ("Attempted to create card with invalid suit argument" + " " + this.suitIdentifier);
     }
 
     public char getSuitDesignator() {

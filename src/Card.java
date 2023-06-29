@@ -1,16 +1,9 @@
-import java.io.Serializable;
-
 public class Card {
 
-    /*Making data "private" is information hiding, so that it cannot be access by
+    /*Making data "private" is information hiding, so that it cannot be accessed by
      *someone else with code outside this class.*/
-    private char suit;
+    private char suit; //TODO: change this to an enum
     private int value;
-
-    private Card() {
-        suit = ' ';
-        value = 0;
-    }
 
     public Card(char newSuit, int newValue) throws InvalidCardValueException, InvalidCardSuitException {
         if (newValue < 1 || newValue > 13) {
@@ -24,9 +17,7 @@ public class Card {
         } else {
             this.suit = newSuit;
         }
-
     }
-
 
     public String toString() {
         return getSuitName() + " " + this.value;
@@ -97,7 +88,6 @@ public class Card {
     public int getValue() {
         return this.value;
     }
-
 
     public boolean compareSuit(Card card) {
         return this.suit == card.getSuitDesignator();
