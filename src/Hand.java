@@ -1,6 +1,6 @@
 public class Hand {
 
-    private Card[] theHand = new Card[12]; //TODO: this should note be a fixed length... change to list
+    private final Card[] theHand = new Card[12]; //TODO: this should note be a fixed length... change to list
 
     private int numberOfCards = 0; //TODO: this should just be the length of the hand list
 

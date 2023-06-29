@@ -2,8 +2,8 @@ public class Card {
 
     /*Making data "private" is information hiding, so that it cannot be accessed by
      *someone else with code outside this class.*/
-    private char suit; //TODO: change this to an enum
-    private int value;
+    private final char suit; //TODO: change this to an enum
+    private final int value;
 
     public Card(char newSuit, int newValue) throws InvalidCardValueException, InvalidCardSuitException {
         if (newValue < 1 || newValue > 13) {
