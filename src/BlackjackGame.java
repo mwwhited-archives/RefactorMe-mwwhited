@@ -193,7 +193,7 @@ public class BlackjackGame {
                     } while (command == Commands.UNKNOWN);
                     if (command == Commands.HIT) {
                         player.add(deal.next());
-                        System.out.println( player);
+                        System.out.println(player);
                     }
                 } while (command != Commands.STAND && player.getTotal() <= 21);
             }
@@ -274,42 +274,38 @@ public class BlackjackGame {
 
     // This decides to force the game to end when all players lose or lets players choose to keep playing or not
     private boolean playAgain() {
-        char c;
         if (forceEnd()) {
             return false;
         } else {
             do {
                 System.out.println();
                 System.out.print("Do you want to play again (Y)es or (N)o? ");
-                var command = scanner.next();
-                c = command.toUpperCase().charAt(0);
-            } while (!(c == 'Y' || c == 'N'));
-            if (c == 'N') {
-                return false;
-            }
+                var c = scanner.next().toUpperCase().charAt(0);
+                if (c == 'N') {
+                    return false;
+                } else if (c == 'Y') {
+                    return true;
+                }
+            } while (true);
         }
-        return true;
     }
 
     // This says true or false to forcing the game to end
     private boolean forceEnd() {
-        boolean end = false;
         int endCount = 0;
 
         for (var player : players) {
-            if (player.getBank() == -1) {
+            if (player.getBank() <= 0) {
                 endCount++;
             }
         }
         if (endCount == players.size()) {
-            end = true;
-        }
-        if (end) {
             System.out.println();
             System.out.println("All players have lost and the game ends.");
+            return true;
         }
 
-        return end;
+        return false;
     }
 
     // This is the endgame code for when all players are out of the game or players decide to stop playing
