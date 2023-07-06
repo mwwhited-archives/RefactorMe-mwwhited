@@ -6,7 +6,7 @@ public enum Commands {
     STAND("Stand"),
     HIT("Hit");
 
-    String name;
+    private final String name;
 
     public String getName() {
         return name;
@@ -17,11 +17,11 @@ public enum Commands {
     }
 
     public static Commands get(String input){
-        if (input.toUpperCase() == "H") return Commands.HIT;
-        if (input.toUpperCase() == "HIT") return Commands.HIT;
+        if (input.equalsIgnoreCase("H")) return Commands.HIT;
+        if (input.equalsIgnoreCase("HIT")) return Commands.HIT;
 
-        if (input.toUpperCase() == "S") return Commands.STAND;
-        if (input.toUpperCase() == "STAND") return Commands.STAND;
+        if (input.equalsIgnoreCase("S")) return Commands.STAND;
+        if (input.equalsIgnoreCase("STAND")) return Commands.STAND;
 
         return Commands.UNKNOWN;
     }

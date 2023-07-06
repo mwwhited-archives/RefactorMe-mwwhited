@@ -12,9 +12,9 @@ public class Deck {
     private static final Random random = new Random();
 
     public Deck() {
-        for (Values value : Values.values()) {
-            if (value == Values.UNKNOWN) continue;
-            for (Suits suit : Suits.values()) {
+        for (Suits suit : Suits.values()) {
+            for (Values value : Values.values()) {
+                if (value == Values.UNKNOWN) continue;
                 deck.add(new Card(suit, value));
             }
         }
@@ -25,9 +25,9 @@ public class Deck {
     }
 
     public void shuffle() {
-        for (int index = deck.size(); index >= 0; index--) {
+        for (int index = deck.size() - 1; index > 0; index--) {
             var current = deck.get(index);
-            var targetIndex = random.nextInt(index);
+            var targetIndex = random.nextInt(0, index);
             var target = deck.get(targetIndex);
 
             deck.set(index, target);

@@ -12,7 +12,7 @@ public class Card {
 
     @Override
     public String toString() {
-        return value + " " + suit;
+        return value.getName() + " of " + suit.getName();
     }
 
     public Values getValue() {

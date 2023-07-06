@@ -10,7 +10,7 @@ public class Hand {
     private final List<Card> hand = new ArrayList<>();
 
     // Calculates the total of a hand and also decides whether ace is 1 or 11
-    public int calculateTotal() {
+    public int getTotal() {
         int total = 0;
         boolean aceFlag = false;
 
@@ -32,51 +32,10 @@ public class Hand {
         return IteratorPresenter.toString(hand);
     }
 
-//    public String toString(boolean isDealer, boolean hideHoleCard) {
-//        String str;
-//        int total = 0;
-//        boolean aceFlag = false;
-//        String aceString = "";
-//        StringBuilder strBuilder = new StringBuilder();
-//        for (int i = 0; i < numberOfCards; i++) {
-//            if (isDealer && hideHoleCard && i == 0) {
-//                strBuilder = new StringBuilder(" Showing");
-//            } else {
-//                int value = theHand[i].getValue();
-//                String valueName;
-//                if (value > 10) {
-//                    valueName = theHand[i].getValueName().substring(0, 1);
-//                } else if (value == 1) {
-//                    valueName = "A";
-//                } else {
-//                    valueName = Integer.toString(value);
-//                }
-//                strBuilder.append(" ").append(valueName).append(theHand[i].getSuit());
-//                if (value > 10) {
-//                    value = 10;
-//                } else if (value == 1) {
-//                    aceFlag = true;
-//                }
-//                total += value;
-//            }
-//        }
-//        str = strBuilder.toString();
-//        if (aceFlag && total + 10 <= 21) {
-//            aceString = " or " + (total + 10);
-//        }
-//        if (hideHoleCard) {
-//            return str;
-//        } else {
-//            return str + " totals " + total + aceString;
-//        }
-//
-//    }
-
-    public void addCard(Card card) { hand.add(card); }
-    public void clearHand() { hand.clear(); }
-
-//    public boolean dealerPeek() {
-//        int value = theHand.get(0).getValue().getValue();
-//        return value == 1 || value >= 10;
-//    }
+    public void add(Card card) {
+        hand.add(card);
+    }
+    public void clear() {
+        hand.clear();
+    }
 }

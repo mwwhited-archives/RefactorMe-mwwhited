@@ -6,7 +6,7 @@ public enum Suits {
     CLUB("Clubs"),
     SPADE("Spades");
 
-    String name;
+    private final String name;
 
     public String getName() {
         return name;

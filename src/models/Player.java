@@ -1,7 +1,7 @@
 package models;
 
 public class Player {
-    public static final int BLACKJACK_VALUE = 12;
+    public static final int BLACKJACK_VALUE = 21;
 
     protected int bank;
     protected int bet;
@@ -15,7 +15,7 @@ public class Player {
     }
 
     public boolean isBlackjack() {
-        return hand.calculateTotal() == BLACKJACK_VALUE;
+        return hand.getTotal() == BLACKJACK_VALUE;
     }
 
     // Gets a player's bank amount
@@ -74,7 +74,7 @@ public class Player {
 
     // Gets a player's hand total
     public int getTotal() {
-        return hand.calculateTotal();
+        return hand.getTotal();
     }
 
     // Gets a player's bet
@@ -83,17 +83,17 @@ public class Player {
     }
 
     // Adds a card to a player's hand
-    public void addCard(Card card) {
-        hand.addCard(card);
+    public void add(Card card) {
+        hand.add(card);
     }
 
-    // Gets the player's cards to print as a string
-    public String getHandString() {
-        return name + ": " + hand;
+    @Override
+    public String toString() {
+        return name + " has " + hand + " (" + getTotal() + ")";
     }
 
     // Clears a player's hand
-    public void clearHand() {
-        hand.clearHand();
+    public void clear() {
+        hand.clear();
     }
 }

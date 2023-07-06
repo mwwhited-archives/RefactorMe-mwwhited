@@ -47,6 +47,7 @@ public class BlackjackGame {
         return this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public BlackjackGame play() {
 
         do {
@@ -140,16 +141,16 @@ public class BlackjackGame {
     private void dealCards() {
         for (int cardCount = 0; cardCount < 2; cardCount++) {
             for (var player : players) {
-                player.addCard(deal.next());
+                player.add(deal.next());
             }
-            dealer.addCard(deal.next());
+            dealer.add(deal.next());
         }
     }
 
     // Initial check for dealer or player Blackjack
     private void checkBlackjack() {
         if (dealer.isBlackjack()) {
-            System.out.println("models.Dealer has BlackJack!");
+            System.out.println(dealer + " has BlackJack!");
 
             for (var player : players) {
                 if (player.getTotal() == 21) {
@@ -181,19 +182,20 @@ public class BlackjackGame {
         for (var player : players) {
             if (player.getBet() > 0) {
                 System.out.println();
-                System.out.println(player.getName() + " has " + player.getHandString());
+                System.out.println(player.getName() + " has " + player);
 
                 Commands command;
                 do {
                     do {
                         System.out.print(player.getName() + " (H)it or (S)tand? ");
-                        command = Commands.get(scanner.next());
-                    } while (command != Commands.UNKNOWN);
+                        var commandString = scanner.next();
+                        command = Commands.get(commandString);
+                    } while (command == Commands.UNKNOWN);
                     if (command == Commands.HIT) {
-                        player.addCard(deal.next());
-                        System.out.println(player.getName() + " has " + player.getHandString());
+                        player.add(deal.next());
+                        System.out.println( player);
                     }
-                } while (command != Commands.STAND && player.getTotal() <= 21 && player.getTotal() > 0);
+                } while (command != Commands.STAND && player.getTotal() <= 21);
             }
         }
     }
@@ -243,10 +245,10 @@ public class BlackjackGame {
     private void printStatus() {
         for (var player : players) {
             if (player.getBank() > 0) {
-                System.out.println(player.getName() + " has " + player.getHandString());
+                System.out.println(player);
             }
         }
-        System.out.println("models.Dealer has " + dealer.toString());
+        System.out.println("models.Dealer has " + dealer);
     }
 
     // This prints the players banks and tells the player if s/he is out of the game
@@ -265,30 +267,28 @@ public class BlackjackGame {
     // This code resets all hands
     private void clearHands() {
         for (var player : players) {
-            player.clearHand();
+            player.clear();
         }
-        dealer.clearHand();
+        dealer.clear();
     }
 
     // This decides to force the game to end when all players lose or lets players choose to keep playing or not
     private boolean playAgain() {
-        String command;
         char c;
-        Boolean playState = true;
         if (forceEnd()) {
-            playState = false;
+            return false;
         } else {
             do {
                 System.out.println();
                 System.out.print("Do you want to play again (Y)es or (N)o? ");
-                command = scanner.next();
+                var command = scanner.next();
                 c = command.toUpperCase().charAt(0);
             } while (!(c == 'Y' || c == 'N'));
             if (c == 'N') {
-                playState = false;
+                return false;
             }
         }
-        return playState;
+        return true;
     }
 
     // This says true or false to forcing the game to end
@@ -328,7 +328,7 @@ public class BlackjackGame {
                 endState = " loss of ";
             }
             System.out.println(player.getName() + " has ended the game with " + player.getBank() + ".");
-            if (endState != " no change.") {
+            if (!endState.equals(" no change.")) {
                 System.out.println("A" + endState + Math.abs(endAmount) + ".");
             } else {
                 System.out.println("No change from their starting value.");
