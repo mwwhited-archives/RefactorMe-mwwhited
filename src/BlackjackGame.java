@@ -1,17 +1,21 @@
+import models.*;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 
 public class BlackjackGame {
 
-    private final Scanner ki = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
     private final Dealer dealer = new Dealer();
+    private final List<Player> players = new ArrayList<>();
+    private final Deck deck = new Deck();
 
-    private int users;
-    private Player[] players; //TODO: change this to list
-    private Deck deck;
+    private Iterator<Card> deal;
 
     // Starts game and displays the rules
     public BlackjackGame initializeGame() {
-        String names;
         System.out.println("Welcome to Blackjack!");
         System.out.println();
         System.out.println("  BLACKJACK RULES: ");
@@ -19,35 +23,31 @@ public class BlackjackGame {
         System.out.println("	-Cards are equal to their value with face cards being 10 and an Ace being 1 or 11.");
         System.out.println("	-The players cards are added up for their total.");
         System.out.println("	-Players “Hit” to gain another card from the deck. Players “Stay” to keep their current card total.");
-        System.out.println("	-Dealer “Hits” until they equal or exceed 17.");
+        System.out.println("	-models.Dealer “Hits” until they equal or exceed 17.");
         System.out.println("	-The goal is to have a higher card total than the dealer without going over 21.");
         System.out.println("	-If the player total equals the dealer total, it is a “Push” and the hand ends.");
         System.out.println("	-Players win their bet if they beat the dealer. Players win 1.5x their bet if they get “Blackjack” which is 21.");
         System.out.println();
         System.out.println();
 
+        int users;
         // Gets the amount of players and creates them
         do {
             System.out.print("How many people are playing (1-6)? ");
-            users = ki.nextInt();
+            users = scanner.nextInt();
         } while (users > 6 || users < 0);
-
-        players = new Player[users];
-        deck = new Deck();
 
         // Asks for player names and assigns them
         for (int i = 0; i < users; i++) {
             System.out.print("What is player " + (i + 1) + "'s name? ");
-            names = ki.next();
-            players[i] = new Player();
-            players[i].setName(names);
+            var names = scanner.next();
+            players.add(new Player(100, names));
         }
 
         return this;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    public BlackjackGame play() throws InvalidDeckPositionException {
+    public BlackjackGame play() {
 
         do {
             this.shuffle();
@@ -93,7 +93,7 @@ public class BlackjackGame {
 
             ObjectInputStream inObjectStream = new ObjectInputStream(inObjectFile);
 
-            Card myNewCard = (Card)inObjectStream.readObject();
+            models.Card myNewCard = (models.Card)inObjectStream.readObject();
 
             System.out.println(myNewCard);
 
@@ -109,95 +109,91 @@ public class BlackjackGame {
 
         catch(ClassNotFoundException cnfException)
         {
-            System.out.println("This is not a Card.");
+            System.out.println("This is not a models.Card.");
         }
     */
 
     // Shuffles the deck
-    private void shuffle() throws InvalidDeckPositionException {
+    private void shuffle() {
         deck.shuffle();
+        deal = deck.deal();
     }
 
     // Gets the bets from the players
     private void getBets() {
         int betValue;
 
-        for (int i = 0; i < users; i++) {
-            if (players[i].getBank() > 0) {
-                do {
-                    System.out.print("How much do you want to bet " + players[i].getName() + (" (1-" + players[i].getBank()) + ")? ");
-                    betValue = ki.nextInt();
-                    players[i].setBet(betValue);
-                } while (!(betValue > 0 && betValue <= players[i].getBank()));
-                System.out.println();
-            }
+        for (var player : players) {
+            if (player.getBank() <= 0) continue;
 
+            do {
+                System.out.print("How much do you want to bet " + player.getName() + (" (1-" + player.getBank()) + ")? ");
+                betValue = scanner.nextInt();
+                player.setBet(betValue);
+            } while (!(betValue > 0 && betValue <= player.getBank()));
+
+            System.out.println();
         }
-
     }
 
     // Deals the cards to the players and dealer
     private void dealCards() {
-        for (int j = 0; j < 2; j++) {
-            for (int i = 0; i < users; i++) {
-                if (players[i].getBank() > 0) {
-                    players[i].addCard(deck.nextCard());
-                }
+        for (int cardCount = 0; cardCount < 2; cardCount++) {
+            for (var player : players) {
+                player.addCard(deal.next());
             }
-
-            dealer.addCard(deck.nextCard());
+            dealer.addCard(deal.next());
         }
     }
 
     // Initial check for dealer or player Blackjack
     private void checkBlackjack() {
-        //System.out.println();
-
         if (dealer.isBlackjack()) {
-            System.out.println("Dealer has BlackJack!");
-            for (int i = 0; i < users; i++) {
-                if (players[i].getTotal() == 21) {
-                    System.out.println(players[i].getName() + " pushes");
-                    players[i].push();
+            System.out.println("models.Dealer has BlackJack!");
+
+            for (var player : players) {
+                if (player.getTotal() == 21) {
+                    System.out.println(player.getName() + " pushes");
+                    player.push();
                 } else {
-                    System.out.println(players[i].getName() + " loses");
-                    players[i].bust();
+                    System.out.println(player.getName() + " loses");
+                    player.bust();
                 }
             }
-        } else {
-            if (dealer.peek()) {
-                System.out.println("Dealer peeks and does not have a BlackJack");
-            }
 
-            for (int i = 0; i < users; i++) {
-                if (players[i].getTotal() == 21) {
-                    System.out.println(players[i].getName() + " has blackjack!");
-                    players[i].blackjack();
+        } else {
+//            if (dealer.peek()) { //TODO: check this logic, not sure if correct
+//                System.out.println("models.Dealer peeks and does not have a BlackJack");
+//            }
+
+            for (var player : players) {
+                if (player.getTotal() == 21) {
+                    System.out.println(player.getName() + " has blackjack!");
+                    player.blackjack();
                 }
             }
         }
+
     }
 
     // This code takes the user commands to hit or stand
     private void hitOrStand() {
-        String command;
-        char c;
-        for (int i = 0; i < users; i++) {
-            if (players[i].getBet() > 0) {
+        for (var player : players) {
+            if (player.getBet() > 0) {
                 System.out.println();
-                System.out.println(players[i].getName() + " has " + players[i].getHandString());
+                System.out.println(player.getName() + " has " + player.getHandString());
 
+                Commands command;
                 do {
                     do {
-                        System.out.print(players[i].getName() + " (H)it or (S)tand? ");
-                        command = ki.next();
-                        c = command.toUpperCase().charAt(0);
-                    } while (!(c == 'H' || c == 'S'));
-                    if (c == 'H') {
-                        players[i].addCard(deck.nextCard());
-                        System.out.println(players[i].getName() + " has " + players[i].getHandString());
+                        System.out.print(player.getName() + " (H)it or (S)tand? ");
+                        command = Commands.get(scanner.next());
+                    } while (command != Commands.UNKNOWN);
+                    if (command == Commands.HIT) {
+                        player.addCard(deal.next());
+                        System.out.println(player.getName() + " has " + player.getHandString());
                     }
-                } while (c != 'S' && players[i].getTotal() <= 21);
+                } while (command != Commands.STAND && player.getTotal() <= 21 && player.getTotal() > 0);
             }
         }
     }
@@ -205,13 +201,14 @@ public class BlackjackGame {
     // Code for the dealer to play
     private void dealerPlays() {
         boolean isSomePlayerStillInTheGame = false;
-        for (int i = 0; i < users && !isSomePlayerStillInTheGame; i++) {
-            if (players[i].getBet() > 0 && players[i].getTotal() <= 21) {
+        for (var player : players) {
+            if (player.getBet() > 0 && player.getTotal() <= 21) {
                 isSomePlayerStillInTheGame = true;
+                break;
             }
         }
         if (isSomePlayerStillInTheGame) {
-            dealer.dealerPlay(deck);
+            dealer.dealerPlay(deal);
         }
     }
 
@@ -219,24 +216,23 @@ public class BlackjackGame {
     private void settleBets() {
         System.out.println();
 
-        for (int i = 0; i < users; i++) {
-            if (players[i].getBet() > 0) {
-                if (players[i].getTotal() > 21) {
-                    System.out.println(players[i].getName() + " has busted");
-                    players[i].bust();
-                } else if (players[i].getTotal() == dealer.calculateTotal()) {
-                    System.out.println(players[i].getName() + " has pushed");
-                    players[i].push();
-                } else if (players[i].getTotal() < dealer.calculateTotal() && dealer.calculateTotal() <= 21) {
-                    System.out.println(players[i].getName() + " has lost");
-                    players[i].loss();
-                } else if (players[i].getTotal() == 21) {
-                    System.out.println(players[i].getName() + " has won with blackjack!");
-                    players[i].blackjack();
+        for (var player : players) {
+            if (player.getBet() > 0) {
+                if (player.getTotal() > 21) {
+                    System.out.println(player.getName() + " has busted");
+                    player.bust();
+                } else if (player.getTotal() == dealer.getTotal()) {
+                    System.out.println(player.getName() + " has pushed");
+                    player.push();
+                } else if (player.getTotal() < dealer.getTotal() && dealer.getTotal() <= 21) {
+                    System.out.println(player.getName() + " has lost");
+                    player.loss();
+                } else if (player.getTotal() == 21) {
+                    System.out.println(player.getName() + " has won with blackjack!");
+                    player.blackjack();
                 } else {
-                    System.out.println(players[i].getName() + " has won");
-                    players[i].win();
-
+                    System.out.println(player.getName() + " has won");
+                    player.win();
                 }
             }
         }
@@ -245,34 +241,33 @@ public class BlackjackGame {
 
     // This prints the players hands
     private void printStatus() {
-        for (int i = 0; i < users; i++) {
-            if (players[i].getBank() > 0) {
-                System.out.println(players[i].getName() + " has " + players[i].getHandString());
+        for (var player : players) {
+            if (player.getBank() > 0) {
+                System.out.println(player.getName() + " has " + player.getHandString());
             }
         }
-        System.out.println("Dealer has " + dealer.getHandString(true, true));
+        System.out.println("models.Dealer has " + dealer.toString());
     }
 
     // This prints the players banks and tells the player if s/he is out of the game
     private void printMoney() {
-        for (int i = 0; i < users; i++) {
-            if (players[i].getBank() > 0) {
-                System.out.println(players[i].getName() + " has " + players[i].getBank());
+        for (var player : players) {
+            if (player.getBank() > 0) {
+                System.out.println(player.getName() + " has " + player.getBank());
             }
-            if (players[i].getBank() == 0) {
-                System.out.println(players[i].getName() + " has " + players[i].getBank() + " and is out of the game.");
-                players[i].removeFromGame();
+            if (player.getBank() == 0) {
+                System.out.println(player.getName() + " has " + player.getBank() + " and is out of the game.");
+                player.removeFromGame();
             }
         }
     }
 
     // This code resets all hands
     private void clearHands() {
-        for (int i = 0; i < users; i++) {
-            players[i].clearHand();
+        for (var player : players) {
+            player.clearHand();
         }
         dealer.clearHand();
-
     }
 
     // This decides to force the game to end when all players lose or lets players choose to keep playing or not
@@ -286,7 +281,7 @@ public class BlackjackGame {
             do {
                 System.out.println();
                 System.out.print("Do you want to play again (Y)es or (N)o? ");
-                command = ki.next();
+                command = scanner.next();
                 c = command.toUpperCase().charAt(0);
             } while (!(c == 'Y' || c == 'N'));
             if (c == 'N') {
@@ -301,12 +296,12 @@ public class BlackjackGame {
         boolean end = false;
         int endCount = 0;
 
-        for (int i = 0; i < users; i++) {
-            if (players[i].getBank() == -1) {
+        for (var player : players) {
+            if (player.getBank() == -1) {
                 endCount++;
             }
         }
-        if (endCount == users) {
+        if (endCount == players.size()) {
             end = true;
         }
         if (end) {
@@ -322,17 +317,17 @@ public class BlackjackGame {
         int endAmount;
         String endState = " no change.";
         System.out.println();
-        for (int i = 0; i < users; i++) {
-            if (players[i].getBank() == -1) {
-                players[i].resetBank();
+        for (var player : players) {
+            if (player.getBank() < 0) {
+                player.resetBank();
             }
-            endAmount = players[i].getBank() - 100;
+            endAmount = player.getBank() - 100;
             if (endAmount > 0) {
                 endState = " gain of ";
             } else if (endAmount < 0) {
                 endState = " loss of ";
             }
-            System.out.println(players[i].getName() + " has ended the game with " + players[i].getBank() + ".");
+            System.out.println(player.getName() + " has ended the game with " + player.getBank() + ".");
             if (endState != " no change.") {
                 System.out.println("A" + endState + Math.abs(endAmount) + ".");
             } else {

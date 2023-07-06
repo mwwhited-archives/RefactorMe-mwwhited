@@ -1,14 +1,21 @@
-public class Player {
+package models;
 
-    private int bank;
-    private int bet;
-    private String name;
-    private final Hand hand;
+public class Player {
+    public static final int BLACKJACK_VALUE = 12;
+
+    protected int bank;
+    protected int bet;
+    protected final String name;
+    protected final Hand hand = new Hand();
 
     // Creates a player object
-    public Player() {
-        bank = 100;
-        hand = new Hand();
+    public Player(int bank, String name) {
+        this.bank = bank;
+        this.name = name;
+    }
+
+    public boolean isBlackjack() {
+        return hand.calculateTotal() == BLACKJACK_VALUE;
     }
 
     // Gets a player's bank amount
@@ -60,11 +67,6 @@ public class Player {
         bet = value;
     }
 
-    // Sets a player's name
-    public void setName(String value) {
-        name = value;
-    }
-
     // Gets a player's name
     public String getName() {
         return name;
@@ -87,7 +89,7 @@ public class Player {
 
     // Gets the player's cards to print as a string
     public String getHandString() {
-        return "Cards:" + hand;
+        return name + ": " + hand;
     }
 
     // Clears a player's hand
