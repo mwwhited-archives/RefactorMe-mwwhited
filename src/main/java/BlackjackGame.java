@@ -1,3 +1,4 @@
+import commands.PlayCommand;
 import models.*;
 
 import java.util.ArrayList;
@@ -7,10 +8,17 @@ import java.util.Scanner;
 
 public class BlackjackGame {
 
-    private final Scanner scanner = new Scanner(System.in);
+    private final PlayCommand playCommand;
+    private final Scanner scanner;
     private final Dealer dealer = new Dealer();
     private final List<Player> players = new ArrayList<>();
-    private final Deck deck = new Deck();
+    private final Deck deck = new Deck(1);
+
+    public BlackjackGame() {
+        this.scanner = new Scanner(System.in);
+        this.playCommand = new PlayCommand(this.scanner);
+    }
+
 
     private Iterator<Card> deal;
 
@@ -34,7 +42,7 @@ public class BlackjackGame {
         do {
             System.out.print("How many people are playing (1-6)? ");
             var users = scanner.nextInt();
-            if (users > 0 && users < 6){
+            if (users > 0 && users < 6) {
 
                 // Asks for player names and assigns them
                 for (int index = 0; index < users; index++) {
@@ -56,8 +64,7 @@ public class BlackjackGame {
             this.dealCards();
             this.printStatus();
             this.checkBlackjack();
-            this.hitOrStand();
-            this.dealerPlays();
+            this.playRound();
             this.settleBets();
             this.printMoney();
             this.clearHands();
@@ -65,54 +72,6 @@ public class BlackjackGame {
         endGame();
         return this;
     }
-
-    //TODO: add load and save values
-    /*
-        try
-        {
-            FileOutputStream outObjectFile = new FileOutputStream("objOut", false);
-
-            ObjectOutputStream outObjectStream = new ObjectOutputStream(outObjectFile);
-
-            outObjectStream.writeObject(mygame);
-
-            outObjectStream.flush();
-            outObjectStream.close();
-        }
-        catch(FileNotFoundException fnfException)
-        {
-            System.out.println("No file");
-        }
-        catch(IOException ioException)
-        {
-            System.out.println("bad IO");
-        }
-
-        try
-        {
-            FileInputStream inObjectFile = new FileInputStream("objOut");
-
-            ObjectInputStream inObjectStream = new ObjectInputStream(inObjectFile);
-
-            models.Card myNewCard = (models.Card)inObjectStream.readObject();
-
-            System.out.println(myNewCard);
-
-        }
-        catch(FileNotFoundException fnfException)
-        {
-            System.out.println("No File");
-        }
-        catch(IOException ioException)
-        {
-            System.out.println("IO no good");
-        }
-
-        catch(ClassNotFoundException cnfException)
-        {
-            System.out.println("This is not a models.Card.");
-        }
-    */
 
     // Shuffles the deck
     private void shuffle() {
@@ -178,39 +137,15 @@ public class BlackjackGame {
     }
 
     // This code takes the user commands to hit or stand
-    private void hitOrStand() {
+    private void playRound() {
+        boolean inPlay = false;
         for (var player : players) {
-            if (player.getBet() > 0) {
-                System.out.println();
-                System.out.println(player.getName() + " has " + player);
-
-                Commands command;
-                do {
-                    do {
-                        System.out.print(player.getName() + " (H)it or (S)tand? ");
-                        var commandString = scanner.next();
-                        command = Commands.get(commandString);
-                    } while (command == Commands.UNKNOWN);
-                    if (command == Commands.HIT) {
-                        player.add(deal.next());
-                        System.out.println(player);
-                    }
-                } while (command != Commands.STAND && player.getTotal() <= 21);
-            }
+            inPlay = inPlay || playCommand.play(player, deal);
         }
-    }
-
-    // Code for the dealer to play
-    private void dealerPlays() {
-        boolean isSomePlayerStillInTheGame = false;
-        for (var player : players) {
-            if (player.getBet() > 0 && player.getTotal() <= 21) {
-                isSomePlayerStillInTheGame = true;
-                break;
-            }
-        }
-        if (isSomePlayerStillInTheGame) {
-            dealer.dealerPlay(deal);
+        if (inPlay){
+            playCommand.play(dealer, deal);
+        }else {
+            System.out.println("all players bust");
         }
     }
 

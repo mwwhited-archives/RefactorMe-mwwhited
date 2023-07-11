@@ -32,6 +32,9 @@ public class Hand {
         return IteratorPresenter.toString(hand);
     }
 
+    public int count() {
+        return hand.size();
+    }
     public void add(Card card) {
         hand.add(card);
     }

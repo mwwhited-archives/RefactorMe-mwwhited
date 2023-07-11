@@ -11,11 +11,13 @@ public class Deck {
     private final List<Card> deck = new ArrayList<>();
     private static final Random random = new Random();
 
-    public Deck() {
-        for (Suits suit : Suits.values()) {
-            for (Values value : Values.values()) {
-                if (value == Values.UNKNOWN) continue;
-                deck.add(new Card(suit, value));
+    public Deck(int deckCount) {
+        for (var deckIndex = 0; deckIndex < deckCount; deckIndex++) {
+            for (Suits suit : Suits.values()) {
+                for (Values value : Values.values()) {
+                    if (value == Values.UNKNOWN) continue;
+                    deck.add(new Card(suit, value));
+                }
             }
         }
     }

@@ -14,6 +14,10 @@ public class Player {
         this.name = name;
     }
 
+    public Hand getHand(){
+        return hand;
+    }
+
     public boolean isBlackjack() {
         return hand.getTotal() == BLACKJACK_VALUE;
     }
