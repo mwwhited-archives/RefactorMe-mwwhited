@@ -5,7 +5,7 @@ import java.util.Iterator;
 public class Dealer extends Player {
 
     public Dealer(){
-        super(-1, "models.Dealer!");
+        super(-1, "Dealer!");
     }
 
     // This automates the dealer's play

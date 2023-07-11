@@ -30,21 +30,21 @@ public class BlackjackGame {
         System.out.println();
         System.out.println();
 
-        int users;
         // Gets the amount of players and creates them
         do {
             System.out.print("How many people are playing (1-6)? ");
-            users = scanner.nextInt();
-        } while (users > 6 || users < 0);
+            var users = scanner.nextInt();
+            if (users > 0 && users < 6){
 
-        // Asks for player names and assigns them
-        for (int i = 0; i < users; i++) {
-            System.out.print("What is player " + (i + 1) + "'s name? ");
-            var names = scanner.next();
-            players.add(new Player(100, names));
-        }
-
-        return this;
+                // Asks for player names and assigns them
+                for (int index = 0; index < users; index++) {
+                    System.out.print("What is player " + (index + 1) + "'s name? ");
+                    var names = scanner.next();
+                    players.add(new Player(100, names));
+                }
+                return this;
+            }
+        } while (true);
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -248,7 +248,7 @@ public class BlackjackGame {
                 System.out.println(player);
             }
         }
-        System.out.println("models.Dealer has " + dealer);
+        System.out.println("Dealer has " + dealer);
     }
 
     // This prints the players banks and tells the player if s/he is out of the game
