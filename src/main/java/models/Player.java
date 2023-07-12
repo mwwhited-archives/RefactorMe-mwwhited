@@ -1,26 +1,30 @@
 package models;
 
-public class Player {
-    public static final int BLACKJACK_VALUE = 21;
+import calculators.Calculate;
+import calculators.CalculateCards;
+import commands.PlayCommand;
 
-    protected int bank;
-    protected int bet;
-    protected final String name;
-    protected final Hand hand = new Hand();
+import java.util.Iterator;
+
+public class Player {
+
+    private int startingBank;
+    private int bank;
+    private int bet;
+    private final String name;
+    private final Hand hand = new Hand();
+    private final Calculate<Iterable<Card>, Integer> total = new CalculateCards();
 
     // Creates a player object
     public Player(int bank, String name) {
-        this.bank = bank;
+        this.startingBank = this.bank = bank;
         this.name = name;
     }
 
-    public Hand getHand(){
+    public Hand getHand() {
         return hand;
     }
 
-    public boolean isBlackjack() {
-        return hand.getTotal() == BLACKJACK_VALUE;
-    }
 
     // Gets a player's bank amount
     public int getBank() {
@@ -76,28 +80,17 @@ public class Player {
         return name;
     }
 
-    // Gets a player's hand total
-    public int getTotal() {
-        return hand.getTotal();
-    }
-
     // Gets a player's bet
     public int getBet() {
         return this.bet;
     }
 
-    // Adds a card to a player's hand
-    public void add(Card card) {
-        hand.add(card);
-    }
-
     @Override
     public String toString() {
-        return name + " has " + hand + " (" + getTotal() + ")";
+        return name + " has " + hand + " (" + total.calculate(hand) + ")";
     }
 
-    // Clears a player's hand
-    public void clear() {
-        hand.clear();
+    public int getStartingBank() {
+        return startingBank;
     }
 }

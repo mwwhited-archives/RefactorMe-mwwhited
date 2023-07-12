@@ -1,6 +1,7 @@
 package models;
 
 import presenters.IteratorPresenter;
+import presenters.ItemPresenter;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,6 +11,7 @@ import java.util.Random;
 public class Deck {
     private final List<Card> deck = new ArrayList<>();
     private static final Random random = new Random();
+    private final ItemPresenter<List<Card>, String> cardPresentor = new IteratorPresenter();
 
     public Deck(int deckCount) {
         for (var deckIndex = 0; deckIndex < deckCount; deckIndex++) {
@@ -23,7 +25,7 @@ public class Deck {
     }
 
     public String toString() {
-        return IteratorPresenter.toString(deck);
+        return cardPresentor.present(deck);
     }
 
     public void shuffle() {

@@ -1,6 +1,12 @@
+import calculators.Calculate;
+import calculators.CalculateBlackjack;
+import calculators.CalculateCards;
 import commands.PlayCommand;
 import models.*;
+import presenters.Presenter;
+import presenters.RulesPresenter;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -10,45 +16,41 @@ public class BlackjackGame {
 
     private final PlayCommand playCommand;
     private final Scanner scanner;
-    private final Dealer dealer = new Dealer();
-    private final List<Player> players = new ArrayList<>();
-    private final Deck deck = new Deck(1);
+    private final PrintStream output;
+    private final Presenter<List<String>> rules;
+    private final GameContext context;
+    private final Calculate<Hand, Boolean> blackjack = new CalculateBlackjack();
+    private final Calculate<Iterable<Card>, Integer> cards = new CalculateCards();
 
     public BlackjackGame() {
+        this.output = System.out;
         this.scanner = new Scanner(System.in);
-        this.playCommand = new PlayCommand(this.scanner);
+        this.playCommand = new PlayCommand(
+                this.scanner,
+                this.output
+        );
+        this.rules = new RulesPresenter();
+        this.context = new GameContext(1);
     }
 
 
-    private Iterator<Card> deal;
-
     // Starts game and displays the rules
     public BlackjackGame initializeGame() {
-        System.out.println("Welcome to Blackjack!");
-        System.out.println();
-        System.out.println("  BLACKJACK RULES: ");
-        System.out.println("	-Each player is dealt 2 cards. The dealer is dealt 2 cards with one face-up and one face-down.");
-        System.out.println("	-Cards are equal to their value with face cards being 10 and an Ace being 1 or 11.");
-        System.out.println("	-The players cards are added up for their total.");
-        System.out.println("	-Players “Hit” to gain another card from the deck. Players “Stay” to keep their current card total.");
-        System.out.println("	-models.Dealer “Hits” until they equal or exceed 17.");
-        System.out.println("	-The goal is to have a higher card total than the dealer without going over 21.");
-        System.out.println("	-If the player total equals the dealer total, it is a “Push” and the hand ends.");
-        System.out.println("	-Players win their bet if they beat the dealer. Players win 1.5x their bet if they get “Blackjack” which is 21.");
-        System.out.println();
-        System.out.println();
+        for(var rule : rules.present()){
+            output.println(rule);
+        }
 
         // Gets the amount of players and creates them
         do {
-            System.out.print("How many people are playing (1-6)? ");
+            output.print("How many people are playing (1-6)? ");
             var users = scanner.nextInt();
-            if (users > 0 && users < 6) {
+            if (users > 0 && users <= 6) {
 
                 // Asks for player names and assigns them
-                for (int index = 0; index < users; index++) {
-                    System.out.print("What is player " + (index + 1) + "'s name? ");
-                    var names = scanner.next();
-                    players.add(new Player(100, names));
+                for (int userIndex = 0; userIndex < users; userIndex++) {
+                    output.print("What is player " + (userIndex + 1) + "'s name? ");
+                    var playerName = scanner.next();
+                    context.getPlayers().add(new Player(context.getDefaultBank(), playerName));
                 }
                 return this;
             }
@@ -59,6 +61,7 @@ public class BlackjackGame {
     public BlackjackGame play() {
 
         do {
+            this.clearHands();
             this.shuffle();
             this.getBets();
             this.dealCards();
@@ -67,7 +70,6 @@ public class BlackjackGame {
             this.playRound();
             this.settleBets();
             this.printMoney();
-            this.clearHands();
         } while (this.playAgain());
         endGame();
         return this;
@@ -75,60 +77,60 @@ public class BlackjackGame {
 
     // Shuffles the deck
     private void shuffle() {
-        deck.shuffle();
-        deal = deck.deal();
+        context.getDeck().shuffle();
+        context.resetDeal();
     }
 
     // Gets the bets from the players
     private void getBets() {
         int betValue;
 
-        for (var player : players) {
+        for (var player : context.getPlayers()) {
             if (player.getBank() <= 0) continue;
 
             do {
-                System.out.print("How much do you want to bet " + player.getName() + (" (1-" + player.getBank()) + ")? ");
+                output.print("How much do you want to bet " + player.getName() + (" (1-" + player.getBank()) + ")? ");
                 betValue = scanner.nextInt();
                 player.setBet(betValue);
             } while (!(betValue > 0 && betValue <= player.getBank()));
 
-            System.out.println();
+            output.println();
         }
     }
 
     // Deals the cards to the players and dealer
     private void dealCards() {
         for (int cardCount = 0; cardCount < 2; cardCount++) {
-            for (var player : players) {
-                player.add(deal.next());
+            for (var player : context.getPlayers()) {
+                player.getHand().add(context.getDeal().next());
             }
-            dealer.add(deal.next());
+            context.getDealer().getHand().add(context.getDeal().next());
         }
     }
 
     // Initial check for dealer or player Blackjack
     private void checkBlackjack() {
-        if (dealer.isBlackjack()) {
-            System.out.println(dealer + " has BlackJack!");
+        if (blackjack.calculate(context.getDealer().getHand())) {
+            output.println(context.getDealer() + " has BlackJack!");
 
-            for (var player : players) {
-                if (player.getTotal() == 21) {
-                    System.out.println(player.getName() + " pushes");
+            for (var player : context.getPlayers()) {
+                if (blackjack.calculate(player.getHand())) {
+                    output.println(player.getName() + " pushes");
                     player.push();
                 } else {
-                    System.out.println(player.getName() + " loses");
+                    output.println(player.getName() + " loses");
                     player.bust();
                 }
             }
 
         } else {
-//            if (dealer.peek()) { //TODO: check this logic, not sure if correct
-//                System.out.println("models.Dealer peeks and does not have a BlackJack");
+//            if (context.getDealer().peek()) { //TODO: check this logic, not sure if correct
+//                output.println("models.Dealer peeks and does not have a BlackJack");
 //            }
 
-            for (var player : players) {
-                if (player.getTotal() == 21) {
-                    System.out.println(player.getName() + " has blackjack!");
+            for (var player : context.getPlayers()) {
+                if (blackjack.calculate(player.getHand())) {
+                    output.println(player.getName() + " has blackjack!");
                     player.blackjack();
                 }
             }
@@ -139,61 +141,62 @@ public class BlackjackGame {
     // This code takes the user commands to hit or stand
     private void playRound() {
         boolean inPlay = false;
-        for (var player : players) {
-            inPlay = inPlay || playCommand.play(player, deal);
+        for (var player : context.getPlayers()) {
+            inPlay = inPlay || playCommand.play(player, context.getDeal());
         }
-        if (inPlay){
-            playCommand.play(dealer, deal);
-        }else {
-            System.out.println("all players bust");
+        if (inPlay) {
+            playCommand.play(context.getDealer(), context.getDeal());
+        } else {
+            output.println("all players bust");
         }
     }
 
     // This code calculates all possible outcomes and adds or removes the player bets
     private void settleBets() {
-        System.out.println();
+        output.println();
 
-        for (var player : players) {
+        var dealerTotal = cards.calculate(context.getDealer().getHand());
+        for (var player : context.getPlayers()) {
+            var playerTotal = cards.calculate(player.getHand());
             if (player.getBet() > 0) {
-                if (player.getTotal() > 21) {
-                    System.out.println(player.getName() + " has busted");
+                if (playerTotal > PlayCommand.BLACKJACK_VALUE) {
+                    output.println(player.getName() + " has busted");
                     player.bust();
-                } else if (player.getTotal() == dealer.getTotal()) {
-                    System.out.println(player.getName() + " has pushed");
+                } else if (playerTotal == dealerTotal) {
+                    output.println(player.getName() + " has pushed");
                     player.push();
-                } else if (player.getTotal() < dealer.getTotal() && dealer.getTotal() <= 21) {
-                    System.out.println(player.getName() + " has lost");
+                } else if (playerTotal< dealerTotal && dealerTotal <= PlayCommand.BLACKJACK_VALUE) {
+                    output.println(player.getName() + " has lost");
                     player.loss();
-                } else if (player.getTotal() == 21) {
-                    System.out.println(player.getName() + " has won with blackjack!");
+                } else if (playerTotal == PlayCommand.BLACKJACK_VALUE) {
+                    output.println(player.getName() + " has won with blackjack!");
                     player.blackjack();
                 } else {
-                    System.out.println(player.getName() + " has won");
+                    output.println(player.getName() + " has won");
                     player.win();
                 }
             }
         }
-
     }
 
     // This prints the players hands
     private void printStatus() {
-        for (var player : players) {
+        for (var player : context.getPlayers()) {
             if (player.getBank() > 0) {
-                System.out.println(player);
+                output.println(player);
             }
         }
-        System.out.println("Dealer has " + dealer);
+        output.println("Dealer has " + context.getDealer());
     }
 
     // This prints the players banks and tells the player if s/he is out of the game
     private void printMoney() {
-        for (var player : players) {
+        for (var player : context.getPlayers()) {
             if (player.getBank() > 0) {
-                System.out.println(player.getName() + " has " + player.getBank());
+                output.println(player.getName() + " has " + player.getBank());
             }
             if (player.getBank() == 0) {
-                System.out.println(player.getName() + " has " + player.getBank() + " and is out of the game.");
+                output.println(player.getName() + " has " + player.getBank() + " and is out of the game.");
                 player.removeFromGame();
             }
         }
@@ -201,10 +204,10 @@ public class BlackjackGame {
 
     // This code resets all hands
     private void clearHands() {
-        for (var player : players) {
-            player.clear();
+        for (var player : context.getPlayers()) {
+            player.getHand().clear();
         }
-        dealer.clear();
+        context.getDealer().getHand().clear();
     }
 
     // This decides to force the game to end when all players lose or lets players choose to keep playing or not
@@ -213,8 +216,8 @@ public class BlackjackGame {
             return false;
         } else {
             do {
-                System.out.println();
-                System.out.print("Do you want to play again (Y)es or (N)o? ");
+                output.println();
+                output.print("Do you want to play again (Y)es or (N)o? ");
                 var c = scanner.next().toUpperCase().charAt(0);
                 if (c == 'N') {
                     return false;
@@ -227,47 +230,41 @@ public class BlackjackGame {
 
     // This says true or false to forcing the game to end
     private boolean forceEnd() {
-        int endCount = 0;
-
-        for (var player : players) {
-            if (player.getBank() <= 0) {
-                endCount++;
+        for (var player : context.getPlayers()) {
+            if (player.getBank() > 0) {
+                return false;
             }
         }
-        if (endCount == players.size()) {
-            System.out.println();
-            System.out.println("All players have lost and the game ends.");
-            return true;
-        }
-
-        return false;
+        output.println();
+        output.println("All players have lost and the game ends.");
+        return true;
     }
 
     // This is the endgame code for when all players are out of the game or players decide to stop playing
     private void endGame() {
         int endAmount;
         String endState = " no change.";
-        System.out.println();
-        for (var player : players) {
+        output.println();
+        for (var player : context.getPlayers()) {
             if (player.getBank() < 0) {
                 player.resetBank();
             }
-            endAmount = player.getBank() - 100;
+            endAmount = player.getBank() - player.getStartingBank();
             if (endAmount > 0) {
                 endState = " gain of ";
             } else if (endAmount < 0) {
                 endState = " loss of ";
             }
-            System.out.println(player.getName() + " has ended the game with " + player.getBank() + ".");
+            output.println(player.getName() + " has ended the game with " + player.getBank() + ".");
             if (!endState.equals(" no change.")) {
-                System.out.println("A" + endState + Math.abs(endAmount) + ".");
+                output.println("A" + endState + Math.abs(endAmount) + ".");
             } else {
-                System.out.println("No change from their starting value.");
+                output.println("No change from their starting value.");
             }
-            System.out.println();
+            output.println();
         }
-        System.out.println();
-        System.out.println();
-        System.out.println("Thank you for playing!");
+        output.println();
+        output.println();
+        output.println("Thank you for playing!");
     }
 } 
